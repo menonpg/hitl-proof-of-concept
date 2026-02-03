@@ -57,13 +57,25 @@ results/*.json
 *.tmp
 *.cache
 
-# Jupyter
+# Jupyter - broken notebooks
 .ipynb_checkpoints/
-*.ipynb
+HITL_Working.ipynb
 
 # Roboflow
 .roboflow/
 
+# ZIP archives
+*.zip
+
 # Keep these important files
 !results/.gitkeep
 !data/.gitkeep
+
+# Exclude old/legacy scripts (keep but don't commit)
+# These are superseded by hitl_colab_script.py and hitl_statistical_validation.py
+01_download_dataset.py
+02_split_dataset.py
+03_convert_to_yolo.py
+04_train_all_iterations.py
+05_evaluate_and_plot.py
+RUN_ALL.sh
