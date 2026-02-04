@@ -9,7 +9,7 @@
 
 ## ABSTRACT
 
-Human-in-the-loop (HITL) training has emerged as a promising approach to improve object detection models through iterative refinement with expert feedback. This study validates the efficacy of HITL methodology by simulating incremental annotation addition using ground truth data as a proxy for human corrections. We trained YOLOv11 models on progressively larger subsets of an electrical utility insulator dataset, demonstrating that incremental training with transfer learning achieves substantial performance improvements. Starting with a baseline model trained on 50 images (mAP@0.5 = 0.134), we iteratively expanded the training set to 100, 200, 300, and 800 images, achieving final performance of mAP@0.5 = 0.994. The results show a 485% relative improvement and an 86-percentage-point absolute gain, with peak intermediate performance of 96.0% mAP@0.5 at 100 images. Notably, the learning curve exhibited a non-monotonic U-shaped pattern, with temporary performance decreases at 200-300 images before final convergence, highlighting the importance of dataset diversity in achieving robust generalization. These findings empirically validate that HITL training significantly enhances detection accuracy while reducing annotation burden compared to traditional approaches, making it a viable strategy for developing production-quality infrastructure inspection systems.
+Human-in-the-loop (HITL) training has emerged as a promising approach to improve object detection models through iterative refinement with expert feedback. This study validates the efficacy of HITL methodology by simulating incremental annotation addition using ground truth data as a proxy for human corrections. We trained YOLOv11 models on progressively larger subsets of an electrical utility insulator dataset across three independent trials with different data folds, demonstrating that incremental training with transfer learning achieves substantial and reproducible performance improvements. Starting with a baseline model trained on 50 images (mAP@0.5 = 0.122 ± 0.010), we iteratively expanded the training set to 100, 200, 300, and 800 images, achieving final performance of mAP@0.5 = 0.995 ± 0.000. The results show a 716% relative improvement and an 87.3-percentage-point absolute gain across trials, with progressive improvements at each increment. Statistical analysis (paired t-test) confirms the improvement is highly significant (t = 124.58, p < 0.001, n=3). These findings empirically validate that HITL training significantly and reproducibly enhances detection accuracy while reducing annotation burden compared to traditional approaches, making it a viable strategy for developing production-quality infrastructure inspection systems.
 
 ---
 
@@ -106,27 +106,31 @@ We hypothesize that:
 
 ## 3. RESULTS
 
-### 3.1 Quantitative Performance
+### 3.1 Quantitative Performance (n=3 trials)
 
-| Iteration | Images | mAP@0.5 | Precision | Recall | Abs. Gain | Rel. Gain |
-|-----------|--------|---------|-----------|--------|-----------|-----------|
-| Baseline  | 50     | 0.134   | -         | -      | -         | -         |
-| Iter1     | 100    | 0.960   | -         | -      | +0.826    | +617%     |
-| Iter2     | 200    | 0.848   | -         | -      | -0.112    | -11.7%    |
-| Iter3     | 300    | 0.789   | -         | -      | -0.059    | -7.0%     |
-| Full      | 800    | 0.994   | >0.99     | >0.99  | +0.205    | +26.0%    |
+| Iteration | Images | mAP@0.5 (mean ± std) | Abs. Gain from Baseline | Rel. Gain |
+|-----------|--------|----------------------|-------------------------|-----------|
+| Baseline  | 50     | 0.122 ± 0.010       | -                       | -         |
+| Iter1     | 100    | 0.793 ± 0.207       | +0.671                  | +550%     |
+| Iter2     | 200    | 0.941 ± 0.059       | +0.819                  | +672%     |
+| Iter3     | 300    | 0.956 ± 0.026       | +0.834                  | +684%     |
+| Full      | 800    | 0.995 ± 0.000       | +0.873                  | +716%     |
 
-**Cumulative Improvement**: 0.134 → 0.994 (+0.860 absolute, +485% relative)
+**Statistical Validation**: 
+- **Cumulative Improvement**: 0.122 → 0.995 (87.3 percentage points, 716% relative)
+- **Significance**: Paired t-test shows highly significant improvement (t=124.58, p<0.001)
+- **Reproducibility**: Low variance across trials (std < 0.10 for all but iter1)
 
 ### 3.2 Learning Trajectory
 
-The mAP progression exhibits a distinctive non-monotonic pattern:
+The mAP progression exhibits progressive, largely monotonic improvement with statistical validation:
 
-1. **Rapid Initial Improvement**: Baseline → Iter1 showed explosive growth (+0.826)
-2. **Performance Plateau/Dip**: Iter1 → Iter3 showed gradual decline (-0.171)
-3. **Final Convergence**: Iter3 → Full recovered and exceeded all previous performance (+0.205)
+1. **Rapid Initial Improvement**: Baseline (12.2%) → Iter1 (79.3%) showed explosive growth (+67.1 points)
+2. **Continued Progress**: Iter1 → Iter2 showed sustained improvement (+14.9 points)
+3. **Fine-tuning**: Iter2 → Iter3 showed refinement (+1.5 points)
+4. **Final Convergence**: Iter3 → Full achieved near-perfect performance (+3.9 points)
 
-This U-shaped curve deviates from expected monotonic improvement, warranting detailed analysis (see Discussion).
+**Notable**: High variance at iter1 (±20.7%) suggests this iteration is most sensitive to data composition, while final model shows near-zero variance (±0.0%), indicating robust convergence.
 
 ### 3.3 Training Efficiency
 

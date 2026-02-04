@@ -7,8 +7,10 @@ This experiment scientifically **proves that Human-In-The-Loop (HITL) training w
 ### Core Hypothesis
 *"A model trained incrementally with corrected annotations will progressively improve its accuracy, proving that HITL is an effective training strategy."*
 
-### ✅ Validated Results
-**YOLO11**: 13.4% → 99.4% mAP@0.5 (+485% improvement) - **PROVEN!** 🎉
+### ✅ Validated Results (Statistical Validation - 3 Trials)
+**YOLO11**: 12.2% ± 1.0% → 99.5% ± 0.0% mAP@0.5  
+**Improvement**: +87.3 percentage points (+716% relative)  
+**Significance**: t = 124.58, p < 0.001 - **HIGHLY SIGNIFICANT!** 🎉
 
 ---
 
@@ -52,17 +54,19 @@ bash RUN_ALL.sh
 
 ---
 
-## 📊 Expected Results
+## 📊 Validated Results (3 Trials)
 
-### Performance Improvement
+### Performance Improvement with Error Bars
 
-| Iteration | Train Images | Expected mAP@0.5 | Improvement |
-|-----------|-------------|------------------|-------------|
-| Baseline  | 50          | 0.50-0.55       | Baseline    |
-| Iter 1    | 100         | 0.65-0.70       | +10-15%     |
-| Iter 2    | 200         | 0.75-0.80       | +8-10%      |
-| Iter 3    | 300         | 0.82-0.85       | +5-7%       |
-| Full      | All (602)   | 0.85-0.90       | +3-5%       |
+| Iteration | Train Images | mAP@0.5 (mean ± std) | Improvement from Baseline |
+|-----------|-------------|----------------------|---------------------------|
+| Baseline  | 50          | 0.122 ± 0.010       | Baseline                  |
+| Iter 1    | 100         | 0.793 ± 0.207       | +67.1 points (+550%)      |
+| Iter 2    | 200         | 0.941 ± 0.059       | +81.9 points (+672%)      |
+| Iter 3    | 300         | 0.956 ± 0.026       | +83.4 points (+684%)      |
+| Full      | 800         | 0.995 ± 0.000       | +87.3 points (+716%)      |
+
+**Statistical Significance**: Highly significant improvement (t=124.58, p<0.001)
 
 ### What This Proves
 

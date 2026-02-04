@@ -231,8 +231,13 @@ iterations = ['baseline', 'iter1', 'iter2', 'iter3', 'full']
 aggregated = {}
 
 for iter_name in iterations:
-    # Collect metrics across all trials
-    map50_values = [trial['iterations'][i]['map50'] for i, trial in enumerate(all_trials) for j, it in enumerate(trial['iterations']) if it['iteration'] == iter_name]
+    # Collect metrics across all trials - FIXED
+    map50_values = []
+    for trial in all_trials:
+        for iteration_result in trial['iterations']:
+            if iteration_result['iteration'] == iter_name:
+                map50_values.append(iteration_result['map50'])
+                break  # Found this iteration, move to next trial
     
     # Calculate mean and std
     aggregated[iter_name] = {
@@ -241,7 +246,7 @@ for iter_name in iterations:
         'map50_values': map50_values
     }
     
-    print(f"{iter_name:10s}: mAP@0.5 = {aggregated[iter_name]['map50_mean']:.4f} ± {aggregated[iter_name]['map50_std']:.4f}")
+    print(f"{iter_name:10s}: mAP@0.5 = {aggregated[iter_name]['map50_mean']:.4f} ± {aggregated[iter_name]['map50_std']:.4f} (n={len(map50_values)})")
 
 # Save aggregated results
 with open('aggregated_results.json', 'w') as f:
@@ -258,19 +263,20 @@ with open('aggregated_results.json', 'w') as f:
 # Create publication-quality plot with error bars
 fig, ax = plt.subplots(figsize=(12, 8))
 
-x = range(len(iterations))
+# Use training image counts for x-axis
+train_sizes = [50, 100, 200, 300, 800]
 means = [aggregated[it]['map50_mean'] for it in iterations]
 stds = [aggregated[it]['map50_std'] for it in iterations]
 
 # Plot line with error bars
-ax.errorbar(x, means, yerr=stds, marker='o', linewidth=3, markersize=12, 
-            capsize=10, capthick=2, color='#2E86AB', label='YOLO11', 
+ax.errorbar(train_sizes, means, yerr=stds, marker='o', linewidth=3, markersize=12, 
+            capsize=10, capthick=2, color='#2E86AB', label=f'YOLO11 (n={args.trials} trials)', 
             elinewidth=2, alpha=0.9)
 
 # Add value labels
-for i, (mean, std) in enumerate(zip(means, stds)):
+for x, mean, std in zip(train_sizes, means, stds):
     ax.annotate(f'{mean:.3f}±{std:.3f}', 
-               (i, mean), 
+               (x, mean), 
                textcoords="offset points",
                xytext=(0,15), 
                ha='center',
@@ -278,21 +284,25 @@ for i, (mean, std) in enumerate(zip(means, stds)):
                fontweight='bold')
 
 # Styling
-ax.set_xlabel('Iteration', fontsize=14, fontweight='bold')
+ax.set_xlabel('Number of Training Images', fontsize=14, fontweight='bold')
 ax.set_ylabel('mAP@0.5', fontsize=14, fontweight='bold')
-ax.set_title(f'HITL Training: mAP@0.5 with Error Bars ({args.trials} Trials)', 
+ax.set_title(f'HITL Training: mAP@0.5 vs Training Set Size (mean ± std, {args.trials} trials)', 
             fontsize=16, fontweight='bold', pad=20)
-ax.set_xticks(x)
-ax.set_xticklabels(iterations)
 ax.grid(True, alpha=0.3, linestyle='--')
 ax.set_ylim(0, 1.05)
-ax.legend(fontsize=12)
+ax.set_xlim(0, 850)
+ax.legend(fontsize=12, loc='lower right')
 
-# Add shaded region for ±1 std
-ax.fill_between(x, 
+# Add shaded confidence region
+ax.fill_between(train_sizes, 
                 [m - s for m, s in zip(means, stds)],
                 [m + s for m, s in zip(means, stds)],
                 alpha=0.2, color='#2E86AB')
+
+# Add baseline and final markers
+ax.axhline(y=means[0], color='red', linestyle='--', alpha=0.3, label=f'Baseline: {means[0]:.3f}')
+ax.axhline(y=means[-1], color='green', linestyle='--', alpha=0.3, label=f'Final: {means[-1]:.3f}')
+ax.legend(fontsize=11, loc='lower right')
 
 plt.tight_layout()
 plt.savefig('publication_plot_with_errorbars.png', dpi=300, bbox_inches='tight')
